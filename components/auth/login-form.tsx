@@ -18,6 +18,7 @@ import { FormError } from "../form-error";
 import { FormSuccess } from "../form-success";
 import { login } from "@/actions/login";
 import { useState, useTransition } from "react";
+import { ReloadIcon } from "@radix-ui/react-icons";
 
 export const LoginForm = () => {
   const [error, setError] = useState<string | undefined>("");
@@ -90,7 +91,14 @@ export const LoginForm = () => {
           <FormError message={error} />
           <FormSuccess message={success} />
           <Button disabled={isPending} type="submit" className="w-full">
-            Login
+            {isPending ? (
+              <>
+                <ReloadIcon className="mr-2 size-4 animate-spin" />
+                <span>Submitting</span>
+              </>
+            ) : (
+              "Login"
+            )}
           </Button>
         </form>
       </Form>

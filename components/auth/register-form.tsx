@@ -18,6 +18,7 @@ import { FormError } from "../form-error";
 import { FormSuccess } from "../form-success";
 import { register } from "@/actions/register";
 import { useState, useTransition } from "react";
+import { ReloadIcon } from "@radix-ui/react-icons";
 
 export const RegisterForm = () => {
   const [error, setError] = useState<string | undefined>("");
@@ -106,7 +107,14 @@ export const RegisterForm = () => {
           <FormError message={error} />
           <FormSuccess message={success} />
           <Button disabled={isPending} type="submit" className="w-full">
-            Create Account
+            {isPending ? (
+              <>
+                <ReloadIcon className="mr-2 size-4 animate-spin" />
+                <span>Submitting</span>
+              </>
+            ) : (
+              "Create an Account"
+            )}
           </Button>
         </form>
       </Form>
