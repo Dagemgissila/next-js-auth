@@ -1,10 +1,13 @@
 "use server";
-import { LoginSchema, RegisterSchema } from "@/schemas";
+import { RegisterSchema } from "@/schemas";
 import z from "zod";
 import bcrypt from "bcrypt";
 import { db } from "@/lib/db";
 import { getUserByEmail } from "@/data/user";
-export const register = async (values: z.infer<typeof LoginSchema>) => {
+import { generateVerificationToken } from "@/lib/tokens";
+import { sendVerificationEmail } from "./../data/mail";
+
+export const register = async (values: z.infer<typeof RegisterSchema>) => {
   const validatedFields = RegisterSchema.safeParse(values);
 
   if (!validatedFields.success) {
@@ -27,7 +30,8 @@ export const register = async (values: z.infer<typeof LoginSchema>) => {
     },
   });
 
-  //send verification token
+  const verificationToken = await generateVerificationToken(email);
+  await sendVerificationEmail(verificationToken.email, verificationToken.token);
 
-  return { success: "User is created" };
+  return { success: "Confirmation Email is send" };
 };
