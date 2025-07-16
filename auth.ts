@@ -33,7 +33,6 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
       return true;
     },
     async session({ session, token }) {
-      console.log("session called");
       if (session.user && token.sub) {
         session.user.id = token.sub;
       }
@@ -49,7 +48,6 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
       if (!existingUser) return token;
 
       token.role = existingUser.role;
-      console.log({ token });
       return token;
     },
   },
