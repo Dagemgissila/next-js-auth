@@ -30,6 +30,7 @@ export const LoginForm = () => {
       : "";
   const [error, setError] = useState<string | undefined>("");
   const [success, setSuccess] = useState<string | undefined>("");
+  const [showTwoFactor, setShowTwoFactor] = useState(false);
 
   const [isPending, startTransition] = useTransition();
   const form = useForm<z.infer<typeof LoginSchema>>({
@@ -37,6 +38,7 @@ export const LoginForm = () => {
     defaultValues: {
       email: "",
       password: "",
+      code: "",
     },
   });
 
@@ -46,8 +48,15 @@ export const LoginForm = () => {
 
     startTransition(() => {
       login(values).then((data) => {
-        setError(data.error);
-        setSuccess(data.success);
+        if (data?.error) {
+          setError(data.error);
+        }
+        if (data?.success) {
+          setSuccess(data.error);
+        }
+        if (data?.twoFactor) {
+          setShowTwoFactor(true);
+        }
       });
     });
   };
@@ -61,47 +70,71 @@ export const LoginForm = () => {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <div className="space-y-4">
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="email"
-                      placeholder="john@gmail.com"
-                      {...field}
-                    />
-                  </FormControl>
+            {showTwoFactor ? (
+              <FormField
+                control={form.control}
+                name="code"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Two Factor Code</FormLabel>
+                    <FormControl>
+                      <Input
+                        disabled={isPending}
+                        placeholder="12345"
+                        {...field}
+                      />
+                    </FormControl>
 
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            ) : (
+              <>
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="email"
+                          disabled={isPending}
+                          placeholder="john@gmail.com"
+                          {...field}
+                        />
+                      </FormControl>
 
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Password</FormLabel>
-                  <FormControl>
-                    <Input
-                      disabled={isPending}
-                      type="password"
-                      placeholder="****"
-                      {...field}
-                    />
-                  </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <Button asChild variant="link" className="px-0 font-normal">
-              <Link href="/auth/reset">Forget password?</Link>
-            </Button>
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Password</FormLabel>
+                      <FormControl>
+                        <Input
+                          disabled={isPending}
+                          type="password"
+                          placeholder="****"
+                          {...field}
+                        />
+                      </FormControl>
+
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <Button asChild variant="link" className="px-0 font-normal">
+                  <Link href="/auth/reset">Forget password?</Link>
+                </Button>
+              </>
+            )}
           </div>
 
           <FormError message={error || urlError} />
@@ -112,6 +145,8 @@ export const LoginForm = () => {
                 <ReloadIcon className="mr-2 size-4 animate-spin" />
                 <span>Submitting</span>
               </>
+            ) : showTwoFactor ? (
+              "Confirm"
             ) : (
               "Login"
             )}
